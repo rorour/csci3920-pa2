@@ -3,6 +3,7 @@ class Message:
         self.__msg = msg
         self.__sender = sender_username
         self.__recipient = recipient_username
+        self.__msg_id = None  # todo generate this
 
     @property
     def msg(self):
