@@ -1,4 +1,4 @@
-from client import Client
+from Client.client import Client
 
 
 def display_menu():
