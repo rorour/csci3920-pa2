@@ -12,7 +12,7 @@ class MessengerSystem:
         print(f'2. Start the Messenger Service')
         print(f'3. Stop the Messenger Service')
         print(f'4. Save Data to File')
-        print(f'5. End this program (also shuts down server)\n')
+        print(f'5. End This Program (also shuts down Messenger Service)\n')
 
     def run_menu(self):
         self.__print_menu()

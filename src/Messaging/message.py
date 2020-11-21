@@ -1,9 +1,13 @@
 class Message:
+
+    next_id = 0
+
     def __init__(self, msg: str, sender_username: str, recipient_username: str):
         self.__msg = msg
         self.__sender = sender_username
         self.__recipient = recipient_username
-        self.__msg_id = None  # todo generate this
+        self.__msg_id = Message.next_id
+        Message.next_id += 1
 
     @property
     def msg(self):

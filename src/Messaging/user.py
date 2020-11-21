@@ -3,7 +3,6 @@ class User:
         self.__username = username
         self.__password = password
         self.__display_name = display_name
-        self.__phone_number = phone_number
 
     @property
     def username(self):
@@ -12,10 +11,6 @@ class User:
     @property
     def display_name(self):
         return self.__display_name
-
-    @property
-    def phone_number(self):
-        return self.__phone_number
 
     @property
     def password(self):

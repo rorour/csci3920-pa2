@@ -10,7 +10,7 @@ class Server(Thread):
     def __init__(self, ip: str, port: int, backlog: int):
         super().__init__()
         ### todo remove testing below
-        self.__queued_messages = [Message('hi', 'me', 'you')]  # all Messages to send
+        self.__queued_messages = [Message('hi', 'me', 'my_username')]  # all Messages to send
         self.__connected_clients = []  # store ClientWorkers
         self.__user_list = []  # all registered Users
         self.__ip = ip
@@ -71,7 +71,7 @@ class Server(Thread):
             cw.terminate_connection()  # tell each cw to close client connection
             cw.join()
 
-        print('[SRV] Server has been shut down.')
+        print('[SRV] Finished shutting down.')
 
 
 class ClientWorker(Thread):
@@ -80,13 +80,15 @@ class ClientWorker(Thread):
         self.__current_user = None
         self.__client_socket = client_socket
         self.__server = server
-        self.__keep_running_client = True
+        self.__keep_running_client = None
 
-    def send_message(self):
+    def __send_message(self, msg):
+        self.__client_socket.send(msg.encode('UTF-8'))
         pass
 
-    def receive_message(self):
-        pass
+    def __receive_message(self, max_length: int = 1024):
+        msg = self.__client_socket.recvmsg(max_length)[0].decode('UTF-8')
+        return msg
 
     def current_user(self):
         return self.__current_user
@@ -95,6 +97,25 @@ class ClientWorker(Thread):
         # todo remove self from server current client list
         self.__keep_running_client = False
         self.__client_socket.close()
+
+    def run(self):
+        self.__send_message('Connected to Messaging System Server')
+        self.__current_user = self.__receive_message()
+        print(self.__current_user)
+        #todo get active user
+        #todo change below testing
+        user_msg = [x for x in self.__server.queued_messages if x.recipient == self.__current_user]
+        if len(user_msg) == 1:
+            self.__send_message(str(user_msg[0]))
+        else:
+            self.__send_message("no messages for you")
+
+
+        # self.__keep_running_client = True
+        # while self.__keep_running_client:
+        #     pass
+        self.__client_socket.close()
+        pass
 
 
 class MessageQueueWorker(Thread):  # continuously attempts to send queued messages
@@ -117,6 +138,7 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
                 try:
                     # todo iterate through connected_clients.current_users
                     print(f'Currently working on {m}')
+                    time.sleep(10)
                 except Exception:
                     # todo catch errors if shutdown while in loop
                     break
