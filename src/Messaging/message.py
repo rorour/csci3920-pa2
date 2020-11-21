@@ -10,9 +10,16 @@ class Message:
         return self.__msg
 
     @property
-    def sender(self):
+    def sender_username(self):
         return self.__sender
 
     @property
     def recipient(self):
         return self.__recipient
+
+    @property
+    def id(self):
+        return self.__msg_id
+
+    def __str__(self):
+        return f'{self.sender_username}|{self.id}|{self.msg}'
