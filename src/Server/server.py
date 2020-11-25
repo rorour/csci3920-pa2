@@ -40,6 +40,10 @@ class Server(Thread):
     def connected_clients(self):
         return self.__connected_clients
 
+    @property
+    def user_list(self):
+        return self.__user_list
+
     def run(self):
         print(f'''[SRV] Starting Server''')
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -77,10 +81,15 @@ class Server(Thread):
 class ClientWorker(Thread):
     def __init__(self, client_socket: socket, server: Server):
         super().__init__()
-        self.__current_user = None
+        self.__current_user = None  # User Type
         self.__client_socket = client_socket
         self.__server = server
         self.__keep_running_client = None
+        self.__outgoing_msg_socket = None
+
+    @property
+    def outgoing_msg_socket(self):
+        return self.__outgoing_msg_socket
 
     def __send_message(self, msg):
         self.__client_socket.send(msg.encode('UTF-8'))
@@ -100,21 +109,110 @@ class ClientWorker(Thread):
 
     def run(self):
         self.__send_message('Connected to Messaging System Server')
-        self.__current_user = self.__receive_message()
-        print(self.__current_user)
-        #todo get active user
-        #todo change below testing
-        user_msg = [x for x in self.__server.queued_messages if x.recipient == self.__current_user]
-        if len(user_msg) == 1:
-            self.__send_message(str(user_msg[0]))
-        else:
-            self.__send_message("no messages for you")
+        # first message should be registration or login
+        self.__login_or_register()
+        self.__second_socket_connection()
+        # process client request
+        while self.__keep_running_client:
+            self.__process_client_request()
 
-
-        # self.__keep_running_client = True
-        # while self.__keep_running_client:
-        #     pass
         self.__client_socket.close()
+        pass
+
+    def __log_in(self, msg_args):
+        username = msg_args[1]
+        password = msg_args[2]
+        # check if user is registered
+        registered = False
+        correct_password = False
+        u: User
+        for u in self.__server.user_list:
+            if u.username == username:
+                registered = True
+                if u.password == password:
+                    correct_password = True
+                    user_to_login = u
+                break
+        if not registered:
+            self.__send_message(f'1|User {username} not registered.')
+            return
+        # check if user is already logged in
+        already_logged_in = False
+        cw: ClientWorker
+        for cw in self.__server.connected_clients:
+            if cw.current_user() is not None and cw.current_user().username == username:
+                already_logged_in = True
+                break
+        if already_logged_in:
+            self.__send_message(f'2|User {username} already logged in.')
+            return
+        # check password
+        if correct_password:
+            self.__send_message(f'0|Correct password.')
+            self.__current_user = user_to_login
+        else:
+            self.__send_message(f'1|Incorrect password.')
+
+    def __create_user(self, msg_args):
+        username = msg_args[1]
+        password = msg_args[2]
+        display_name = msg_args[3]
+        # check if username already exists
+        registered = False
+        u: User
+        for u in self.__server.user_list:
+            if u.username == username:
+                registered = True
+        if registered:
+            self.__send_message(f'1|Username {username} already registered.')
+            return
+        else:
+            new_user = User(username, password, display_name)
+            self.__server.user_list.append(new_user)
+            self.__log_in(['0', username, password])
+        pass
+
+    def __login_or_register(self):
+        while self.__current_user is None:
+            msg = self.__receive_message()
+            msg_args = msg.split('|')
+            if msg_args[0] == 'LOG':
+                self.__log_in(msg_args)
+                pass
+            elif msg_args[0] == 'USR':
+                self.__create_user(msg_args)
+                pass
+            else:
+                self.__send_message('1|Unknown command to log in user.')
+
+    def __process_client_request(self):
+        client_msg = self.__receive_message()
+        client_msg_args = client_msg.split('|')
+        if client_msg_args[0] == 'MSG':  # recv msg from client
+            self.__process_incoming_msg(client_msg_args)
+        elif client_msg_args[0] == 'OUT':  # logout and disconnect client
+            pass
+
+        pass
+
+    def __second_socket_connection(self):
+        # get port num from original connection
+        new_socket_info = self.__receive_message()
+        new_socket_info = new_socket_info.split('|')
+        ip = new_socket_info[0]
+        port = int(new_socket_info[1])
+        # connect to second socket
+        self.__outgoing_msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__outgoing_msg_socket.connect((ip, port))
+
+
+    def __process_incoming_msg(self, client_msg_args):
+        # todo add error handling for sender/recipient not existing
+        sender = client_msg_args[1]
+        recipient = client_msg_args[2]
+        msg_content = client_msg_args[3]
+        self.__server.queued_messages.append(Message(msg_content, sender, recipient))
+        self.__send_message('0|Message accepted')
         pass
 
 
@@ -123,6 +221,13 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
         super().__init__()
         self.__keep_sending = True
         self.__server = server
+
+    def __send_message(self, socket: socket, msg):
+        socket.send(msg.encode('UTF-8'))
+
+    def __receive_message(self, socket: socket, max_length: int = 1024):
+        msg = socket.recvmsg(max_length)[0].decode('UTF-8')
+        return msg
 
     @property
     def keep_sending(self):
@@ -134,15 +239,17 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
 
     def run(self):
         while self.keep_sending:
-            for m in self.__server.queued_messages:
+            u: ClientWorker
+            for u in self.__server.connected_clients:
                 try:
-                    # todo iterate through connected_clients.current_users
-                    print(f'Currently working on {m}')
-                    time.sleep(10)
+                    user_msgs = [m for m in self.__server.queued_messages if m.recipient == u.current_user().username]
+                    for msg in user_msgs:
+                        self.__send_message(u.outgoing_msg_socket, str(msg))
+                        confirmation = self.__receive_message(u.outgoing_msg_socket)
+                        print(f'Attempted to send {msg} to {u.current_user().username} : Server said -> {confirmation}')
                 except Exception:
                     # todo catch errors if shutdown while in loop
                     break
-                    pass
             pass
 
 

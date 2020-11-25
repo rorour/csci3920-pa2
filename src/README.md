@@ -3,6 +3,7 @@
 
 ## To Do:
 #### Client:
+- [ ] Check Message Length (500 chars)
 
 #### Server: 
 - [ ] Load Data From File

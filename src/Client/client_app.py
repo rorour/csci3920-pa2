@@ -1,5 +1,5 @@
 from threading import Thread
-from Client.client import Client
+from Client.client import Client, IncomingMessageChannel
 import socket
 
 
@@ -10,6 +10,11 @@ class ClientMessage:
         self.__is_logged_in = False
         self.__client = None
         self.__username = None
+        self.__incoming_msg_channel = None
+        self.__listen_for_incoming_msgs = False
+        self.__incoming_message_queue = []
+        self.__ip = None
+        self.__port = None
 
     def __menu_options(self):
         print("=" * 30)
@@ -35,6 +40,8 @@ class ClientMessage:
         elif option == 2:
             if self.__is_connected:
                 self.__menu_login()
+            if self.__is_logged_in:
+                self.__create_incoming_channel()
             else:
                 print("Connect to server before attempting to login")
         elif option == 3:
@@ -57,14 +64,13 @@ class ClientMessage:
 
     def __menu_connect(self):
         # todo: Test wrong connections
-        # ip = str(input("Enter IP Address: "))
-        # port = int(input("Enter Port Number: "))
-        # self.__client = Client(ip, port)
 
         # todo: delete testing stuff
         print("IP Address: 127.0.0.1")
         print("Port Number: 10000")
-        client = Client('127.0.0.1', 10000)
+        self.__ip = '127.0.0.1'
+        self.__port = 10000
+        self.__client = Client(self.__ip, self.__port)
 
         self.__client.connect()
         server_message = self.__client.receive_message()
@@ -74,10 +80,10 @@ class ClientMessage:
     def __menu_login(self):
         log_type = str(input("Existing User? y/n"))
         if log_type.lower() == 'y':
-            self._logging_in(True)
+            self.__logging_in(True)
         elif log_type.lower() == 'n':
             print("Sign Up: ")
-            self._logging_in(False)
+            self.__logging_in(False)
         else:
             print("Invalid Input: please answer y or n")
 
@@ -107,14 +113,18 @@ class ClientMessage:
         print(f"""[CLI] SRV -> {server_message}""")
 
     def __menu_print_messages(self):
-        # todo: implement receiving messages
-        pass
+        # read all messages in queue
+        for m in self.__incoming_message_queue:
+            print(m)
+            self.__incoming_message_queue.remove(m)
 
     def __menu_disconnect(self):
+        # todo output all remaining messages in queue
         self.__client.send_message('OUT|OK')
         server_message = self.__client.receive_message()
         print(f"""[CLI] SRV -> {server_message}""")
         if server_message.split('|')[0] == '0':
+            self.__listen_for_incoming_msgs = False
             self.__client.disconnect()
             self.__is_connected = False
             self.__is_logged_in = False
@@ -124,6 +134,24 @@ class ClientMessage:
     @property
     def keep_running(self):
         return self.__keep_running
+
+    @property
+    def keep_listening_for_incoming_msgs(self):
+        return self.__listen_for_incoming_msgs
+
+    @keep_listening_for_incoming_msgs.setter
+    def keep_listening_for_incoming_msgs(self, new_val):
+        self.__listen_for_incoming_msgs = new_val
+
+    @property
+    def client(self):
+        return self.__client
+
+    def __create_incoming_channel(self):
+        self.__incoming_msg_channel = IncomingMessageChannel(self, self.__ip)
+        self.__listen_for_incoming_msgs = True
+        self.__incoming_msg_channel.start()
+        pass
 
 
 if __name__ == "__main__":
