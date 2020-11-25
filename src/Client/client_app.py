@@ -9,12 +9,13 @@ class ClientMessage:
         self.__is_connected = False
         self.__is_logged_in = False
         self.__client = None
+        self.__id = None
         self.__username = None
         self.__incoming_msg_channel = None
         self.__listen_for_incoming_msgs = False
-        self.__incoming_message_queue = []
         self.__ip = None
         self.__port = None
+        self.__second_socket_port = None
 
     def __menu_options(self):
         print("=" * 30)
@@ -99,9 +100,11 @@ class ClientMessage:
 
         server_message = self.__client.receive_message()
         print(f"""[CLI] SRV -> {server_message}""")
-        if server_message.split('|')[0] == '0':
+        server_msg = server_message.split('|')
+        if server_msg[0] == '0':
             self.__username = username
             self.__is_logged_in = True
+            self.__id = server_msg[2]
 
     def __menu_send_message(self):
         """Sends message to target username"""
@@ -114,9 +117,9 @@ class ClientMessage:
 
     def __menu_print_messages(self):
         # read all messages in queue
-        for m in self.__incoming_message_queue:
+        for m in self.__client.received_msgs:
             print(m)
-            self.__incoming_message_queue.remove(m)
+            self.__client.received_msgs.remove(m)
 
     def __menu_disconnect(self):
         # todo output all remaining messages in queue
@@ -148,7 +151,8 @@ class ClientMessage:
         return self.__client
 
     def __create_incoming_channel(self):
-        self.__incoming_msg_channel = IncomingMessageChannel(self, self.__ip)
+        self.__second_socket_port = 10010 + int(self.__id)
+        self.__incoming_msg_channel = IncomingMessageChannel(self, self.__ip, self.__second_socket_port)
         self.__listen_for_incoming_msgs = True
         self.__incoming_msg_channel.start()
         pass

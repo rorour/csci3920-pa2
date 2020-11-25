@@ -10,6 +10,10 @@ class Client:
         self.__server_receive = None
         self.__is_connected = False
 
+    @property
+    def received_msgs(self):
+        return self.__received_msgs
+
     def connect(self):
         try:
             self.__server_receive = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,24 +42,13 @@ class Client:
 
 
 class IncomingMessageChannel(Thread):
-    __port_num = 10010
-
-    def __init__(self, client_app, ip):
+    def __init__(self, client_app, ip, port):
         super().__init__()
         self.__client_app = client_app
         self.__incoming_msg_socket = None
         self.__ip = ip
-        self.__port = IncomingMessageChannel.__port_num
-        IncomingMessageChannel.__port_num += 1
+        self.__port = port
         self.__backlog = 1
-
-    # @staticmethod
-    # def port_num():
-    #     return IncomingMessageChannel.__port_num
-    #
-    # @staticmethod
-    # def increment_port_num():
-    #     IncomingMessageChannel.__port_num += 1
 
     def run(self):
         # create second socket
@@ -66,12 +59,15 @@ class IncomingMessageChannel(Thread):
         # send second socket port num to server
         self.__client_app.client.send_message(f'{self.__ip}|{self.__port}')
 
+        self.__incoming_msg_socket, client_address = self.__incoming_msg_socket.accept()
+
         # while keep running client
         while self.__client_app.keep_listening_for_incoming_msgs:
-            pass
             # read message
-        # add to client queue
-        # send confirmation to server
+            new_msg = self.__incoming_msg_socket.recv(1024).decode("UTF-8")
+            # add to client queue
+            self.__client_app.client.received_msgs.append(new_msg)
+            # send confirmation to server
+            self.__incoming_msg_socket.send('0|OK'.encode("UTF-8"))
 
-        pass
 

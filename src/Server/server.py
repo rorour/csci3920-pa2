@@ -44,6 +44,10 @@ class Server(Thread):
     def user_list(self):
         return self.__user_list
 
+    @property
+    def connection_count(self):
+        return self.__connection_count
+
     def run(self):
         print(f'''[SRV] Starting Server''')
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,7 +63,7 @@ class Server(Thread):
                 client_socket, client_address = self.__server_socket.accept()
                 self.__connection_count += 1
                 print(f'''[SRV] Connection #{self.__connection_count} from {client_address}''')
-                cw = ClientWorker(client_socket, self)
+                cw = ClientWorker(client_socket, self, self.__connection_count)
                 self.__connected_clients.append(cw)
                 cw.start()
             except ConnectionAbortedError:
@@ -79,13 +83,14 @@ class Server(Thread):
 
 
 class ClientWorker(Thread):
-    def __init__(self, client_socket: socket, server: Server):
+    def __init__(self, client_socket: socket, server: Server, id):
         super().__init__()
         self.__current_user = None  # User Type
         self.__client_socket = client_socket
         self.__server = server
-        self.__keep_running_client = None
+        self.__keep_running_client = True
         self.__outgoing_msg_socket = None
+        self.__id = id
 
     @property
     def outgoing_msg_socket(self):
@@ -148,7 +153,7 @@ class ClientWorker(Thread):
             return
         # check password
         if correct_password:
-            self.__send_message(f'0|Correct password.')
+            self.__send_message(f'0|Correct password|{self.__id}')  # provide connection # to create unique port number
             self.__current_user = user_to_login
         else:
             self.__send_message(f'1|Incorrect password.')
@@ -205,7 +210,6 @@ class ClientWorker(Thread):
         self.__outgoing_msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__outgoing_msg_socket.connect((ip, port))
 
-
     def __process_incoming_msg(self, client_msg_args):
         # todo add error handling for sender/recipient not existing
         sender = client_msg_args[1]
@@ -247,9 +251,9 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
                         self.__send_message(u.outgoing_msg_socket, str(msg))
                         confirmation = self.__receive_message(u.outgoing_msg_socket)
                         print(f'Attempted to send {msg} to {u.current_user().username} : Server said -> {confirmation}')
+                        if confirmation.split('|')[0] == '0':
+                            self.__server.queued_messages.remove(msg)
                 except Exception:
                     # todo catch errors if shutdown while in loop
                     break
             pass
-
-
