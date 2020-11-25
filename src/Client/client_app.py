@@ -17,6 +17,10 @@ class ClientMessage:
         self.__port = None
         self.__second_socket_port = None
 
+    def run(self):
+        while self.__keep_running:
+            self.display_menu()
+
     def __menu_options(self):
         print("=" * 30)
         print(f'{"Message Board:":^30}')
@@ -65,10 +69,6 @@ class ClientMessage:
 
     def __menu_connect(self):
         # todo: Test wrong connections
-
-        # todo: delete testing stuff
-        print("IP Address: 127.0.0.1")
-        print("Port Number: 10000")
         self.__ip = '127.0.0.1'
         self.__port = 10000
         self.__client = Client(self.__ip, self.__port)
@@ -108,7 +108,6 @@ class ClientMessage:
 
     def __menu_send_message(self):
         """Sends message to target username"""
-        # todo: test sending messages
         username_to = str(input("Input the username to send message to: "))
         message = str(input("Type message: "))
         self.__client.send_message(f'MSG|{self.__username}|{username_to}|{message}')
@@ -117,22 +116,31 @@ class ClientMessage:
 
     def __menu_print_messages(self):
         # read all messages in queue
-        for m in self.__client.received_msgs:
+        while self.__client.received_msgs:
+            m = self.__client.received_msgs[0]
             print(m)
             self.__client.received_msgs.remove(m)
 
     def __menu_disconnect(self):
-        # todo output all remaining messages in queue
+        print('Disconnecting and shutting down.')
+        # output all remaining messages in queue
+        if self.__client.received_msgs:
+            print('Remaining messages in queue:')
+        self.__menu_print_messages()
         self.__client.send_message('OUT|OK')
         server_message = self.__client.receive_message()
         print(f"""[CLI] SRV -> {server_message}""")
         if server_message.split('|')[0] == '0':
             self.__listen_for_incoming_msgs = False
+            self.__incoming_msg_channel.incoming_msg_socket.close()
+            self.__incoming_msg_channel.join()
             self.__client.disconnect()
             self.__is_connected = False
             self.__is_logged_in = False
             self.__keep_running = False
-        self.__keep_running = True  # todo: delete this once server/client messaging is completed
+            print('Successfully shut down.')
+        else:
+            print('Did not close connection to server.')
 
     @property
     def keep_running(self):
@@ -160,5 +168,4 @@ class ClientMessage:
 
 if __name__ == "__main__":
     messenger = ClientMessage()
-    while messenger.keep_running:
-        messenger.display_menu()
+    messenger.run()

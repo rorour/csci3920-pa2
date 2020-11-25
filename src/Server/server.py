@@ -9,8 +9,7 @@ from Messaging.message import Message
 class Server(Thread):
     def __init__(self, ip: str, port: int, backlog: int):
         super().__init__()
-        ### todo remove testing below
-        self.__queued_messages = [Message('hi', 'me', 'my_username')]  # all Messages to send
+        self.__queued_messages = []  # all Messages to send
         self.__connected_clients = []  # store ClientWorkers
         self.__user_list = []  # all registered Users
         self.__ip = ip
@@ -62,7 +61,7 @@ class Server(Thread):
             try:
                 client_socket, client_address = self.__server_socket.accept()
                 self.__connection_count += 1
-                print(f'''[SRV] Connection #{self.__connection_count} from {client_address}''')
+                print(f'''\n[SRV] Connection #{self.__connection_count} from {client_address}''')
                 cw = ClientWorker(client_socket, self, self.__connection_count)
                 self.__connected_clients.append(cw)
                 cw.start()
@@ -108,9 +107,10 @@ class ClientWorker(Thread):
         return self.__current_user
 
     def terminate_connection(self):
-        # todo remove self from server current client list
+        self.__server.connected_clients.remove(self)
         self.__keep_running_client = False
         self.__client_socket.close()
+        print(f'[SRV] Connection #{self.__id} closed.')
 
     def run(self):
         self.__send_message('Connected to Messaging System Server')
@@ -120,9 +120,6 @@ class ClientWorker(Thread):
         # process client request
         while self.__keep_running_client:
             self.__process_client_request()
-
-        self.__client_socket.close()
-        pass
 
     def __log_in(self, msg_args):
         username = msg_args[1]
@@ -196,9 +193,8 @@ class ClientWorker(Thread):
         if client_msg_args[0] == 'MSG':  # recv msg from client
             self.__process_incoming_msg(client_msg_args)
         elif client_msg_args[0] == 'OUT':  # logout and disconnect client
-            pass
-
-        pass
+            self.__send_message('0|OK')
+            self.terminate_connection()
 
     def __second_socket_connection(self):
         # get port num from original connection
@@ -211,13 +207,20 @@ class ClientWorker(Thread):
         self.__outgoing_msg_socket.connect((ip, port))
 
     def __process_incoming_msg(self, client_msg_args):
-        # todo add error handling for sender/recipient not existing
         sender = client_msg_args[1]
         recipient = client_msg_args[2]
         msg_content = client_msg_args[3]
+        # check if user is registered
+        found_recipient = [u for u in self.__server.user_list if u.username == recipient]
+        if not found_recipient:
+            self.__send_message(f'1|No target user {recipient}.')
+            return
+        found_sender = [u for u in self.__server.user_list if u.username == sender]
+        if not found_sender:
+            self.__send_message(f'1|No source user {sender}.')
+            return
         self.__server.queued_messages.append(Message(msg_content, sender, recipient))
         self.__send_message('0|Message accepted')
-        pass
 
 
 class MessageQueueWorker(Thread):  # continuously attempts to send queued messages
@@ -250,10 +253,10 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
                     for msg in user_msgs:
                         self.__send_message(u.outgoing_msg_socket, str(msg))
                         confirmation = self.__receive_message(u.outgoing_msg_socket)
-                        print(f'Attempted to send {msg} to {u.current_user().username} : Server said -> {confirmation}')
+                        print(f'Attempted to send {msg} to {u.current_user().username} : Client said -> {confirmation}')
                         if confirmation.split('|')[0] == '0':
                             self.__server.queued_messages.remove(msg)
-                except Exception:
-                    # todo catch errors if shutdown while in loop
-                    break
+                except Exception as e:
+                    print(f'MessageQueueWorker: {e}')
+                    # if exception, move on to different ClientWorker
             pass

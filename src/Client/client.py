@@ -28,10 +28,6 @@ class Client:
     def receive_message(self):
         return self.__server_receive.recv(1024).decode("UTF-8")
 
-    def print_messages(self):
-        # todo: implement
-        pass
-
     def disconnect(self):
         self.__server_receive.close()
         self.__is_connected = False
@@ -50,6 +46,10 @@ class IncomingMessageChannel(Thread):
         self.__port = port
         self.__backlog = 1
 
+    @property
+    def incoming_msg_socket(self):
+        return self.__incoming_msg_socket
+
     def run(self):
         # create second socket
         self.__incoming_msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,10 +64,14 @@ class IncomingMessageChannel(Thread):
         # while keep running client
         while self.__client_app.keep_listening_for_incoming_msgs:
             # read message
-            new_msg = self.__incoming_msg_socket.recv(1024).decode("UTF-8")
-            # add to client queue
-            self.__client_app.client.received_msgs.append(new_msg)
-            # send confirmation to server
-            self.__incoming_msg_socket.send('0|OK'.encode("UTF-8"))
-
+            try:
+                new_msg = self.__incoming_msg_socket.recv(1024).decode("UTF-8")
+                # add to client queue
+                self.__client_app.client.received_msgs.append(new_msg)
+                # send confirmation to server
+                self.__incoming_msg_socket.send('0|OK'.encode("UTF-8"))
+            except IOError:
+                # break from while loop when socket closed
+                break
+        self.__incoming_msg_socket.close()
 
