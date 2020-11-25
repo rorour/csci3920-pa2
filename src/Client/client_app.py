@@ -22,15 +22,25 @@ class ClientMessage:
             self.display_menu()
 
     def __menu_options(self):
-        print("=" * 30)
-        print(f'{"Message Board:":^30}')
+        print("=" * 50)
+        print(f'{"Message Board:":^50}')
+        print(f'{"Connected to Server" if self.__is_connected else "Not Connected to Server":^50}')
+        # todo: maybe display display_name, need to grab info from server though
+        welcome = "Welcome "
+        welcome += str(self.__username) + "!"
+        print(f'{welcome if self.__is_logged_in else "Not Logged in":^50}')
+        # print(f'Welcome {self.__username}' if self.__is_logged_in else 'Not Logged In')
+        print("-" * 50)
+
         print("1. Connect to server")
         print("2. Login")
         print("3. Send Message")
         print("4. Print Received Messages")
         print("5. Disconnect")
+        print("-" * 50)
         try:
             menu = int(input("Select option [1-5]: "))
+            print("-" * 50)
             return menu
         except ValueError:
             pass
@@ -69,6 +79,8 @@ class ClientMessage:
 
     def __menu_connect(self):
         # todo: Test wrong connections
+        # self.__ip = str(input("Server IP: "))
+        # self.__port = int(input("Port: "))
         self.__ip = '127.0.0.1'
         self.__port = 10000
         self.__client = Client(self.__ip, self.__port)
@@ -79,11 +91,11 @@ class ClientMessage:
         self.__is_connected = self.__client.is_connected    # changes connection status
 
     def __menu_login(self):
-        log_type = str(input("Existing User? y/n"))
+        log_type = str(input("Existing User? y/n : "))
         if log_type.lower() == 'y':
             self.__logging_in(True)
         elif log_type.lower() == 'n':
-            print("Sign Up: ")
+            print("Sign Up")
             self.__logging_in(False)
         else:
             print("Invalid Input: please answer y or n")
@@ -109,10 +121,13 @@ class ClientMessage:
     def __menu_send_message(self):
         """Sends message to target username"""
         username_to = str(input("Input the username to send message to: "))
-        message = str(input("Type message: "))
-        self.__client.send_message(f'MSG|{self.__username}|{username_to}|{message}')
-        server_message = self.__client.receive_message()
-        print(f"""[CLI] SRV -> {server_message}""")
+        message = str(input("Type message [max 500 char]: "))
+        if len(message) <= 500:
+            self.__client.send_message(f'MSG|{self.__username}|{username_to}|{message}')
+            server_message = self.__client.receive_message()
+            print(f"""[CLI] SRV -> {server_message}""")
+        else:
+            print("500 Character limit reached: Did not send message")
 
     def __menu_print_messages(self):
         # read all messages in queue
@@ -122,6 +137,7 @@ class ClientMessage:
             self.__client.received_msgs.remove(m)
 
     def __menu_disconnect(self):
+        # todo disconnect from server if never logged in
         print('Disconnecting and shutting down.')
         # output all remaining messages in queue
         if self.__client.received_msgs:

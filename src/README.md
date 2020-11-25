@@ -3,10 +3,11 @@
 
 ## To Do:
 #### Client:
-- [ ] Check Message Length (500 chars)
+- [X] Check Message Length (500 chars)
 - [X] Print Messages
 - [X] Terminate Connection
-- [ ] Change UI (add username etc)
+- [X] Change UI (add username etc)
+- [ ] Disconnect if never logged in but connected 
 
 #### Server: 
 - [ ] Load Data From File
@@ -18,7 +19,12 @@
 
 #### Other:
 - [ ] Extra Credit GUI
+    - [ ] Designed
+    - [ ] Implemented
 - [ ] Add method descriptions
 - [ ] Remove all todo
 - [ ] README
 - [ ] Project Structure (separate files for each class?)
+
+#### Known Bugs:
+- [ ] Printing queued messages will repeat continuously (both on server and client)
