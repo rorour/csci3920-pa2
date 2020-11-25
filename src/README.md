@@ -18,6 +18,7 @@
 
 #### Other:
 - [ ] Extra Credit GUI
+- [ ] Add method descriptions
+- [ ] Remove all todo
 - [ ] README
 - [ ] Project Structure (separate files for each class?)
-- [ ] Add method descriptions
