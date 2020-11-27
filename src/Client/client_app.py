@@ -73,22 +73,29 @@ class ClientMessage:
             if self.__is_connected:
                 self.__menu_disconnect()
             else:
-                print("Already disconnected from server")
+                print("Already disconnected from server. Exiting program instead")
+                self.__keep_running = False
+
+
         else:
             print("Invalid input")
 
     def __menu_connect(self):
-        # todo: Test wrong connections
+        # todo: cleanup: get rid of debug and uncomment the input commands
         # self.__ip = str(input("Server IP: "))
         # self.__port = int(input("Port: "))
-        self.__ip = '127.0.0.1'
-        self.__port = 10000
+
+        self.__ip = '127.0.0.1'  # debug
+        self.__port = 10000  # debug
         self.__client = Client(self.__ip, self.__port)
 
+        print("Attempting to Connect...")
         self.__client.connect()
-        server_message = self.__client.receive_message()
-        print(f"""[CLI] SRV -> {server_message}""")
-        self.__is_connected = self.__client.is_connected    # changes connection status
+
+        if self.__client.is_connected:
+            server_message = self.__client.receive_message()
+            print(f"""[CLI] SRV -> {server_message}""")
+            self.__is_connected = self.__client.is_connected  # changes connection status
 
     def __menu_login(self):
         log_type = str(input("Existing User? y/n : "))
@@ -101,7 +108,6 @@ class ClientMessage:
             print("Invalid Input: please answer y or n")
 
     def __logging_in(self, registered: bool):
-        # todo: test logging in
         username = str(input("Enter Username: "))
         password = str(input("Enter Password: "))
         if registered:

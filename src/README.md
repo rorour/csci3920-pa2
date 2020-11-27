@@ -7,7 +7,11 @@
 - [X] Print Messages
 - [X] Terminate Connection
 - [X] Change UI (add username etc)
-- [ ] Disconnect if never logged in but connected 
+- [ ] Connecting Exception Handling
+    - [X] Connecting to server that is offline
+    - [X] Connecting to serverIP and port that does not exist
+    - [ ] Connecting to wrong, but existing server (optional todo?)
+- [ ] Disconnect if never logged in but connected
 
 #### Server: 
 - [ ] Load Data From File

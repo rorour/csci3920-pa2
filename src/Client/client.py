@@ -18,9 +18,12 @@ class Client:
         try:
             self.__server_receive = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__server_receive.connect((self.__ip, self.__port))
+
+        except ConnectionError:
+            print(f'Could not Connect')
+        else:
             self.__is_connected = True
-        except ConnectionError as c:
-            print(f'Could not Connect: {c}')
+
 
     def send_message(self, msg: str):
         self.__server_receive.send(msg.encode("UTF-8"))
