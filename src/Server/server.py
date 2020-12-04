@@ -1,4 +1,6 @@
 import socket
+# todo remove traceback
+import traceback
 import time
 from datetime import date
 from threading import Thread
@@ -248,15 +250,23 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
         while self.keep_sending:
             u: ClientWorker
             for u in self.__server.connected_clients:
-                try:
-                    user_msgs = [m for m in self.__server.queued_messages if m.recipient == u.current_user().username]
-                    for msg in user_msgs:
-                        self.__send_message(u.outgoing_msg_socket, str(msg))
-                        confirmation = self.__receive_message(u.outgoing_msg_socket)
-                        print(f'Attempted to send {msg} to {u.current_user().username} : Client said -> {confirmation}')
-                        if confirmation.split('|')[0] == '0':
-                            self.__server.queued_messages.remove(msg)
-                except Exception as e:
-                    print(f'MessageQueueWorker: {e}')
-                    # if exception, move on to different ClientWorker
+                if u.current_user() is not None and u.outgoing_msg_socket is not None:  # filter out connected users that have not logged in
+                    try:
+                        user_msgs = [m for m in self.__server.queued_messages if m.recipient == u.current_user().username]
+                        for msg in user_msgs:
+                            self.__send_message(u.outgoing_msg_socket, str(msg))
+                            confirmation = self.__receive_message(u.outgoing_msg_socket)
+                            try:
+                                print(
+                                    f'Attempted to send {msg} to {u.current_user().username} : Client said -> {confirmation}')
+                                if confirmation.split('|')[0] == '0':
+                                    self.__server.queued_messages.remove(msg)
+                            except Exception as e:
+                                print(f'MessageQueueWorker: {e}')
+                                traceback.print_exc()
+                    except OSError as ose:
+                        # this will be thrown if second socket is not finished setting up. move on to different CW
+                        pass
+
+
             pass

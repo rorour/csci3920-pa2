@@ -1,4 +1,8 @@
 import time
+import json
+
+from Messaging.user import User
+from Messaging.message import Message
 from Server.server import Server
 
 
@@ -47,22 +51,53 @@ class MessengerSystem:
         pass
 
     def __stop_service(self):
+        if self.__server is None:
+            print('Server must be started first.')
+            return
         # end server thread
         self.__server.keep_running_server = False
         self.__server.server_socket.close()
 
     def __load_from_file(self):
-        # todo
-        pass
+        if self.__server is None:
+            print('Server must be started first.')
+            return
+        try:
+            with open('saved_messenger_system.json', 'r') as infile:
+                server_info_json = json.load(infile)
+            user_list_json = server_info_json[0]
+            queued_messages_json = server_info_json[1]
+        except Exception as e:
+            print(f'Error loading file: {e}')
+            return
+
+        for u_dict in user_list_json:
+            new_un = u_dict['_User__username']
+            new_pw = u_dict['_User__password']
+            new_dn = u_dict['_User__display_name']
+            self.__server.user_list.append(User(new_un, new_pw, new_dn))
+
+        for m_dict in queued_messages_json:
+            m_msg = m_dict['_Message__msg']
+            m_sen = m_dict['_Message__sender']
+            m_rec = m_dict['_Message__recipient']
+            self.__server.queued_messages.append(Message(m_msg, m_sen, m_rec))
+        print('Users and Messages loaded from file successfully.')
 
     def __save_to_file(self):
-        # todo
-        pass
+        if self.__server is None:
+            print('Server must be started first.')
+            return
+        with open('saved_messenger_system.json', 'w') as outfile:
+            outfile.write('[\n')
+            json.dump([x.__dict__ for x in self.__server.user_list], outfile)
+            outfile.write(',\n')
+            json.dump([x.__dict__ for x in self.__server.queued_messages], outfile)
+            outfile.write('\n]')
 
     def __end_program(self):
         self.__keep_running_program = False
         self.__stop_service()
-        pass
 
     @property
     def keep_running_program(self):

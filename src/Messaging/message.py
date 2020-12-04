@@ -1,3 +1,6 @@
+import json
+
+
 class Message:
 
     next_id = 0

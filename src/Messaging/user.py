@@ -15,3 +15,6 @@ class User:
     @property
     def password(self):
         return self.__password
+
+    def __str__(self):
+        return f'{self.username}|{self.display_name}'

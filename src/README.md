@@ -13,6 +13,7 @@
     - [ ] Connecting to wrong, but existing server (optional todo?)
 - [ ] Disconnect if never logged in but connected
 
+
 #### Server: 
 - [ ] Load Data From File
 - [ ] Save Data To File
@@ -32,3 +33,6 @@
 
 #### Known Bugs:
 - [ ] Printing queued messages will repeat continuously (both on server and client)
+* message board displays username currently, should be display name?
+* got error message "Connect to server before attempting to login" when connected but
+  attempting to log in to unregistered user
