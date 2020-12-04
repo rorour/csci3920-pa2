@@ -15,8 +15,8 @@
 
 
 #### Server: 
-- [ ] Load Data From File
-- [ ] Save Data To File
+- [X] Load Data From File
+- [X] Save Data To File
 - [X] CW Second Client Thread for Send/Receive
 - [X] CW Send/Receive Messages with Client
 - [X] Implement MessageQueueWorker
@@ -33,6 +33,5 @@
 
 #### Known Bugs:
 - [ ] Printing queued messages will repeat continuously (both on server and client)
-* message board displays username currently, should be display name?
-* got error message "Connect to server before attempting to login" when connected but
-  attempting to log in to unregistered user
+- [ ] message board displays username currently, should be display name?
+- [ ] got error message "Connect to server before attempting to login" when connected but attempting to log in to unregistered user
