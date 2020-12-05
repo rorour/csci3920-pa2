@@ -16,6 +16,7 @@ class ClientMessage:
         self.__ip = None
         self.__port = None
         self.__second_socket_port = None
+        self.__display_name = None
 
     '''Starts main client-side thread.'''
     def run(self):
@@ -29,7 +30,7 @@ class ClientMessage:
         print(f'{"Connected to Server" if self.__is_connected else "Not Connected to Server":^50}')
         # todo: maybe display display_name, need to grab info from server though
         welcome = "Welcome "
-        welcome += str(self.__username) + "!"
+        welcome += str(self.__display_name) + "!"
         print(f'{welcome if self.__is_logged_in else "Not Logged in":^50}')
         # print(f'Welcome {self.__username}' if self.__is_logged_in else 'Not Logged In')
         print("-" * 50)
@@ -127,6 +128,7 @@ class ClientMessage:
             self.__username = username
             self.__is_logged_in = True
             self.__id = server_msg[2]
+            self.__display_name = server_msg[3]
 
     """Sends message to target username"""
     def __menu_send_message(self):

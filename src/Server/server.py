@@ -68,7 +68,7 @@ class Server(Thread):
                 cw = ClientWorker(client_socket, self, self.__connection_count)
                 self.__connected_clients.append(cw)
                 cw.start()
-            except ConnectionAbortedError:
+            except (ConnectionAbortedError, OSError):
                 print('[SRV] No longer listening for new connections.')
 
         mqw.keep_sending = False  # stop sending out messages
@@ -100,10 +100,10 @@ class ClientWorker(Thread):
 
     def __send_message(self, msg):
         self.__client_socket.send(msg.encode('UTF-8'))
-        pass
+
 
     def __receive_message(self, max_length: int = 1024):
-        msg = self.__client_socket.recvmsg(max_length)[0].decode('UTF-8')
+        msg = self.__client_socket.recv(max_length).decode('UTF-8')
         return msg
 
     def current_user(self):
@@ -113,7 +113,8 @@ class ClientWorker(Thread):
     def terminate_connection(self):
         self.__server.connected_clients.remove(self)
         self.__keep_running_client = False
-        self.__client_socket.close()
+        if self.__client_socket is not None:
+            self.__client_socket.close()
         print(f'[SRV] Connection #{self.__id} closed.')
 
     '''Runs thread which allows connected client to log in and then processes client requests.'''
@@ -124,7 +125,10 @@ class ClientWorker(Thread):
         self.__second_socket_connection()
         # process client request
         while self.__keep_running_client:
-            self.__process_client_request()
+            try:
+                self.__process_client_request()
+            except Exception as e:
+                print(e)
 
     '''Logs in User if registered and not already logged in.'''
     def __log_in(self, msg_args):
@@ -156,7 +160,7 @@ class ClientWorker(Thread):
             return
         # check password
         if correct_password:
-            self.__send_message(f'0|Correct password|{self.__id}')  # provide connection # to create unique port number
+            self.__send_message(f'0|Correct password|{self.__id}|{user_to_login.display_name}')  # provide connection # to create unique port number
             self.__current_user = user_to_login
         else:
             self.__send_message(f'1|Incorrect password.')
@@ -192,6 +196,10 @@ class ClientWorker(Thread):
             elif msg_args[0] == 'USR':
                 self.__create_user(msg_args)
                 pass
+            elif msg_args[0] == 'OUT':
+                self.__send_message('0|OK')
+                self.terminate_connection()
+
             else:
                 self.__send_message('1|Unknown command to log in user.')
 
@@ -247,7 +255,8 @@ class MessageQueueWorker(Thread):
         socket.send(msg.encode('UTF-8'))
 
     def __receive_message(self, socket: socket, max_length: int = 1024):
-        msg = socket.recvmsg(max_length)[0].decode('UTF-8')
+        #msg = socket.recvmsg(max_length)[0].decode('UTF-8')
+        msg = socket.recv(max_length).decode('UTF-8')
         return msg
 
     @property
