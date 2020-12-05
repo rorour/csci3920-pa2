@@ -1,8 +1,4 @@
 import socket
-# todo remove traceback
-import traceback
-import time
-from datetime import date
 from threading import Thread
 from Messaging.user import User
 from Messaging.message import Message
@@ -49,6 +45,11 @@ class Server(Thread):
     def connection_count(self):
         return self.__connection_count
 
+    '''
+    Runs thread to accept connections from clients and passes connections to ClientWorker.
+    Starts MessageQueueWorker thread to send messages to clients.
+    Shuts down server and all connections when keep_running_server is False.
+    '''
     def run(self):
         print(f'''[SRV] Starting Server''')
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -108,12 +109,14 @@ class ClientWorker(Thread):
     def current_user(self):
         return self.__current_user
 
+    '''Terminate client connection and remove self from list of connected clients.'''
     def terminate_connection(self):
         self.__server.connected_clients.remove(self)
         self.__keep_running_client = False
         self.__client_socket.close()
         print(f'[SRV] Connection #{self.__id} closed.')
 
+    '''Runs thread which allows connected client to log in and then processes client requests.'''
     def run(self):
         self.__send_message('Connected to Messaging System Server')
         # first message should be registration or login
@@ -123,6 +126,7 @@ class ClientWorker(Thread):
         while self.__keep_running_client:
             self.__process_client_request()
 
+    '''Logs in User if registered and not already logged in.'''
     def __log_in(self, msg_args):
         username = msg_args[1]
         password = msg_args[2]
@@ -157,6 +161,7 @@ class ClientWorker(Thread):
         else:
             self.__send_message(f'1|Incorrect password.')
 
+    '''Creates a new User if username is not taken.'''
     def __create_user(self, msg_args):
         username = msg_args[1]
         password = msg_args[2]
@@ -176,6 +181,7 @@ class ClientWorker(Thread):
             self.__log_in(['0', username, password])
         pass
 
+    '''Takes client input and passes to method to either log in or register new User.'''
     def __login_or_register(self):
         while self.__current_user is None:
             msg = self.__receive_message()
@@ -189,6 +195,7 @@ class ClientWorker(Thread):
             else:
                 self.__send_message('1|Unknown command to log in user.')
 
+    '''Process request from client: either receive message from client or log out'''
     def __process_client_request(self):
         client_msg = self.__receive_message()
         client_msg_args = client_msg.split('|')
@@ -198,6 +205,7 @@ class ClientWorker(Thread):
             self.__send_message('0|OK')
             self.terminate_connection()
 
+    '''Set up second connection to client to send messages from other Users to client'''
     def __second_socket_connection(self):
         # get port num from original connection
         new_socket_info = self.__receive_message()
@@ -208,6 +216,10 @@ class ClientWorker(Thread):
         self.__outgoing_msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__outgoing_msg_socket.connect((ip, port))
 
+    '''
+    Accept incoming message from client if sender & receiver are registered.
+    Sends confirmation to client.
+    '''
     def __process_incoming_msg(self, client_msg_args):
         sender = client_msg_args[1]
         recipient = client_msg_args[2]
@@ -225,7 +237,7 @@ class ClientWorker(Thread):
         self.__send_message('0|Message accepted')
 
 
-class MessageQueueWorker(Thread):  # continuously attempts to send queued messages
+class MessageQueueWorker(Thread):
     def __init__(self, server: Server):
         super().__init__()
         self.__keep_sending = True
@@ -246,11 +258,13 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
     def keep_sending(self, new_val):
         self.__keep_sending = new_val
 
+    '''Runs MessageQueueWorker thread to continuously attempt to send queued messages to logged-in Users'''
     def run(self):
         while self.keep_sending:
             u: ClientWorker
             for u in self.__server.connected_clients:
-                if u.current_user() is not None and u.outgoing_msg_socket is not None:  # filter out connected users that have not logged in
+                # filter out connected users that have not logged in
+                if u.current_user() is not None and u.outgoing_msg_socket is not None:
                     try:
                         user_msgs = [m for m in self.__server.queued_messages if m.recipient == u.current_user().username]
                         for msg in user_msgs:
@@ -263,10 +277,6 @@ class MessageQueueWorker(Thread):  # continuously attempts to send queued messag
                                     self.__server.queued_messages.remove(msg)
                             except Exception as e:
                                 print(f'MessageQueueWorker: {e}')
-                                traceback.print_exc()
                     except OSError as ose:
                         # this will be thrown if second socket is not finished setting up. move on to different CW
                         pass
-
-
-            pass

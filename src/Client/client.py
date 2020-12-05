@@ -14,23 +14,25 @@ class Client:
     def received_msgs(self):
         return self.__received_msgs
 
+    '''Connect to server socket.'''
     def connect(self):
         try:
             self.__server_receive = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__server_receive.connect((self.__ip, self.__port))
-
         except ConnectionError:
             print(f'Could not Connect')
         else:
             self.__is_connected = True
 
-
+    '''Send message to server on first socket.'''
     def send_message(self, msg: str):
         self.__server_receive.send(msg.encode("UTF-8"))
 
+    '''Receive confirmation/error message from server on first socket.'''
     def receive_message(self):
         return self.__server_receive.recv(1024).decode("UTF-8")
 
+    '''Disconnect from server socket.'''
     def disconnect(self):
         self.__server_receive.close()
         self.__is_connected = False
@@ -53,6 +55,10 @@ class IncomingMessageChannel(Thread):
     def incoming_msg_socket(self):
         return self.__incoming_msg_socket
 
+    '''
+    Runs thread which creates socket for second server connection.
+    Continuously listens for messages from other Users sent by server and adds them to client's queue.
+    '''
     def run(self):
         # create second socket
         self.__incoming_msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

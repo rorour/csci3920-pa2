@@ -17,10 +17,12 @@ class ClientMessage:
         self.__port = None
         self.__second_socket_port = None
 
+    '''Starts main client-side thread.'''
     def run(self):
         while self.__keep_running:
             self.display_menu()
 
+    '''Print User info and menu.'''
     def __menu_options(self):
         print("=" * 50)
         print(f'{"Message Board:":^50}')
@@ -45,6 +47,7 @@ class ClientMessage:
         except ValueError:
             pass
 
+    '''Display menu and take user input for menu choice.'''
     def display_menu(self):
         option = self.__menu_options()
         if option == 1:
@@ -75,11 +78,10 @@ class ClientMessage:
             else:
                 print("Already disconnected from server. Exiting program instead")
                 self.__keep_running = False
-
-
         else:
             print("Invalid input")
 
+    '''Connects to server with ip and port provided by keyboard input.'''
     def __menu_connect(self):
         # todo: cleanup: get rid of debug and uncomment the input commands
         # self.__ip = str(input("Server IP: "))
@@ -97,6 +99,7 @@ class ClientMessage:
             print(f"""[CLI] SRV -> {server_message}""")
             self.__is_connected = self.__client.is_connected  # changes connection status
 
+    '''Gets user keyboard input for login or signup'''
     def __menu_login(self):
         log_type = str(input("Existing User? y/n : "))
         if log_type.lower() == 'y':
@@ -107,6 +110,7 @@ class ClientMessage:
         else:
             print("Invalid Input: please answer y or n")
 
+    '''Gets login info from keyboard input and sends to server'''
     def __logging_in(self, registered: bool):
         username = str(input("Enter Username: "))
         password = str(input("Enter Password: "))
@@ -124,8 +128,8 @@ class ClientMessage:
             self.__is_logged_in = True
             self.__id = server_msg[2]
 
+    """Sends message to target username"""
     def __menu_send_message(self):
-        """Sends message to target username"""
         username_to = str(input("Input the username to send message to: "))
         message = str(input("Type message [max 500 char]: "))
         if len(message) <= 500:
@@ -135,13 +139,17 @@ class ClientMessage:
         else:
             print("500 Character limit reached: Did not send message")
 
+    '''Print all messages in queue.'''
     def __menu_print_messages(self):
-        # read all messages in queue
         while self.__client.received_msgs:
             m = self.__client.received_msgs[0]
             print(m)
             self.__client.received_msgs.remove(m)
 
+    '''
+    Logout and disconnect from server.
+    Prints all remaining received messages in queue.
+    '''
     def __menu_disconnect(self):
         # todo disconnect from server if never logged in
         print('Disconnecting and shutting down.')
@@ -180,12 +188,12 @@ class ClientMessage:
     def client(self):
         return self.__client
 
+    '''Create socket for second connection to server and start new thread once server connects.'''
     def __create_incoming_channel(self):
         self.__second_socket_port = 10010 + int(self.__id)
         self.__incoming_msg_channel = IncomingMessageChannel(self, self.__ip, self.__second_socket_port)
         self.__listen_for_incoming_msgs = True
         self.__incoming_msg_channel.start()
-        pass
 
 
 if __name__ == "__main__":

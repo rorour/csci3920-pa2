@@ -11,6 +11,7 @@ class MessengerSystem:
         self.__server = None
         self.__keep_running_program = True
 
+    '''Print Server App menu.'''
     def __print_menu(self):
         print(f'\n1. Load Data from File')
         print(f'2. Start the Messenger Service')
@@ -18,6 +19,10 @@ class MessengerSystem:
         print(f'4. Save Data to File')
         print(f'5. End This Program (also shuts down Messenger Service without saving)\n')
 
+    '''
+    Display menu with options  to start/stop/load/save server.
+    Takes user input from keyboard.
+    '''
     def run_menu(self):
         while self.__keep_running_program:
             self.__print_menu()
@@ -44,12 +49,13 @@ class MessengerSystem:
             else:
                 print(f'Unknown command {option}.')
 
+    '''Create and run server in new thread'''
     def __start_service(self):
-        # create and run server in new thread
         self.__server = Server('127.0.0.1', 10000, 10)
         self.__server.start()
         pass
 
+    '''Stop running server.'''
     def __stop_service(self):
         if self.__server is None:
             print('Server must be started first.')
@@ -58,6 +64,10 @@ class MessengerSystem:
         self.__server.keep_running_server = False
         self.__server.server_socket.close()
 
+    '''
+    Load saved Users and queued Messages.
+    Must be called after server has started running.
+    '''
     def __load_from_file(self):
         if self.__server is None:
             print('Server must be started first.')
@@ -84,6 +94,7 @@ class MessengerSystem:
             self.__server.queued_messages.append(Message(m_msg, m_sen, m_rec))
         print('Users and Messages loaded from file successfully.')
 
+    '''Save registered Users and queued Messages to file.'''
     def __save_to_file(self):
         if self.__server is None:
             print('Server must be started first.')
@@ -95,6 +106,7 @@ class MessengerSystem:
             json.dump([x.__dict__ for x in self.__server.queued_messages], outfile)
             outfile.write('\n]')
 
+    '''Stop running server and shut down main thread.'''
     def __end_program(self):
         self.__keep_running_program = False
         self.__stop_service()

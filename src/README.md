@@ -26,7 +26,7 @@
 - [ ] Extra Credit GUI
     - [ ] Designed
     - [ ] Implemented
-- [ ] Add method descriptions
+- [X] Add method descriptions
 - [ ] Remove all todo
 - [ ] README
 - [ ] Project Structure (separate files for each class?)
