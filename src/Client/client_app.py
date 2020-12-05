@@ -28,7 +28,6 @@ class ClientMessage:
         print("=" * 50)
         print(f'{"Message Board:":^50}')
         print(f'{"Connected to Server" if self.__is_connected else "Not Connected to Server":^50}')
-        # todo: maybe display display_name, need to grab info from server though
         welcome = "Welcome "
         welcome += str(self.__display_name) + "!"
         print(f'{welcome if self.__is_logged_in else "Not Logged in":^50}')
@@ -84,12 +83,8 @@ class ClientMessage:
 
     '''Connects to server with ip and port provided by keyboard input.'''
     def __menu_connect(self):
-        # todo: cleanup: get rid of debug and uncomment the input commands
-        # self.__ip = str(input("Server IP: "))
-        # self.__port = int(input("Port: "))
-
-        self.__ip = '127.0.0.1'  # debug
-        self.__port = 10000  # debug
+        self.__ip = str(input("Server IP: "))
+        self.__port = int(input("Port: "))
         self.__client = Client(self.__ip, self.__port)
 
         print("Attempting to Connect...")
@@ -153,7 +148,6 @@ class ClientMessage:
     Prints all remaining received messages in queue.
     '''
     def __menu_disconnect(self):
-        # todo disconnect from server if never logged in
         print('Disconnecting and shutting down.')
         # output all remaining messages in queue
         if self.__client.received_msgs:
@@ -164,8 +158,9 @@ class ClientMessage:
         print(f"""[CLI] SRV -> {server_message}""")
         if server_message.split('|')[0] == '0':
             self.__listen_for_incoming_msgs = False
-            self.__incoming_msg_channel.incoming_msg_socket.close()
-            self.__incoming_msg_channel.join()
+            if self.__incoming_msg_channel is not None:
+                self.__incoming_msg_channel.incoming_msg_socket.close()
+                self.__incoming_msg_channel.join()
             self.__client.disconnect()
             self.__is_connected = False
             self.__is_logged_in = False

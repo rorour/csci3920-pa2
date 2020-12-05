@@ -1,34 +1,22 @@
 # PA 2
 #### Team 2 (Lora Kalthoff & Raven O'Rourke)
 
-## To Do:
 #### Client:
-- [X] Check Message Length (500 chars)
-- [X] Print Messages
-- [X] Terminate Connection
-- [X] Change UI (add username etc)
-- [ ] Connecting Exception Handling
-    - [X] Connecting to server that is offline
-    - [X] Connecting to serverIP and port that does not exist
-- [ ] Disconnect if never logged in but connected
+ - Running the Client App displays a menu where the user can connect to the messaging system Server 
+   and login or register as a new User. 
+ -  Once logged in, the User can send a message to another registered User
+   by knowing their username.
+ - Selecting 'Print Received Messages' will print any messages that have been received
+   from other Users.
+ - Disconnecting will disconnect from the server, print any remaining received messages, and
+   shut down the client program.
+ - Port #10000 should be used to connect to the Server.
+ - Users that are currently saved are
+   - Username: raven Password: pw1
+   - Username: lora  Password: pw2
 
 
-#### Server: 
-- [X] Load Data From File
-- [X] Save Data To File
-- [X] CW Second Client Thread for Send/Receive
-- [X] CW Send/Receive Messages with Client
-- [X] Implement MessageQueueWorker
-- [X] Terminate Client Connections
+#### Server:
+ - Running the Server App displays a menu where the admin can start running the Server for the messaging system.
+ - Registered Users and queued Messages can be loaded from or saved to a JSON file once the Server has been started.
 
-#### Other:
-- [X] Add method descriptions
-- [ ] Remove all todo
-- [ ] README
-- [ ] Project Structure (separate files for each class?)
-
-
-#### Known Bugs:
-- [X] Printing queued messages will repeat continuously (both on server and client)
-- [X] message board displays username currently, should be display name?
-- [X] got error message "Connect to server before attempting to login" when connected but attempting to log in to unregistered user

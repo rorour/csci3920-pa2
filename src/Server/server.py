@@ -103,7 +103,7 @@ class ClientWorker(Thread):
 
 
     def __receive_message(self, max_length: int = 1024):
-        msg = self.__client_socket.recv(max_length).decode('UTF-8')
+        msg = self.__client_socket.recvmsg(max_length)[0].decode('UTF-8')
         return msg
 
     def current_user(self):
@@ -121,14 +121,17 @@ class ClientWorker(Thread):
     def run(self):
         self.__send_message('Connected to Messaging System Server')
         # first message should be registration or login
-        self.__login_or_register()
-        self.__second_socket_connection()
-        # process client request
-        while self.__keep_running_client:
-            try:
-                self.__process_client_request()
-            except Exception as e:
-                print(e)
+        not_disconnected = self.__login_or_register()
+        if not_disconnected:
+            self.__second_socket_connection()
+            # process client request
+            while self.__keep_running_client:
+                try:
+                    self.__process_client_request()
+                except Exception as e:
+                    print(e)
+        else:
+            print(f'Client {self.__id} disconnected before login.')
 
     '''Logs in User if registered and not already logged in.'''
     def __log_in(self, msg_args):
@@ -187,7 +190,9 @@ class ClientWorker(Thread):
 
     '''Takes client input and passes to method to either log in or register new User.'''
     def __login_or_register(self):
-        while self.__current_user is None:
+        not_disconnected = True
+        msg_args = ['']
+        while self.__current_user is None and not msg_args[0] == 'OUT':
             msg = self.__receive_message()
             msg_args = msg.split('|')
             if msg_args[0] == 'LOG':
@@ -199,9 +204,10 @@ class ClientWorker(Thread):
             elif msg_args[0] == 'OUT':
                 self.__send_message('0|OK')
                 self.terminate_connection()
-
+                not_disconnected = False
             else:
                 self.__send_message('1|Unknown command to log in user.')
+        return not_disconnected
 
     '''Process request from client: either receive message from client or log out'''
     def __process_client_request(self):
