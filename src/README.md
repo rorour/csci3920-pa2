@@ -24,14 +24,19 @@
 
 #### Other:
 - [ ] Extra Credit GUI
-    - [ ] Designed
+    - [X] Designed
     - [ ] Implemented
+    	- [X] Client Class
+    	- [ ] IncomingMsg class
+    	- [X] GUI functionality
 - [ ] Add method descriptions
 - [ ] Remove all todo
 - [ ] README
 - [ ] Project Structure (separate files for each class?)
+- [ ] Place PA2 GUI outside of the python folder when done (right now in there, not sure where to place it in GitHub)
 
 #### Known Bugs:
 - [ ] Printing queued messages will repeat continuously (both on server and client)
 - [ ] message board displays username currently, should be display name?
-- [ ] got error message "Connect to server before attempting to login" when connected but attempting to log in to unregistered user
+- [X] got error message "Connect to server before attempting to login" when connected but attempting to log in to unregistered user
+- [ ] GUI Freezes after connecting to server (haven't been able to test beyond that) Possible cause is the input/output streams

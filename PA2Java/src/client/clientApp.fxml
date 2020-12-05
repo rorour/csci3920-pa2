@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane maxHeight="600.0" maxWidth="800.0" minHeight="600.0" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.Controller">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="562.8" minHeight="10.0" prefHeight="562.8" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="194.79999389648438" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <Pane fx:id="paneConnect" disable="true" prefHeight="200.0" prefWidth="200.0" visible="false">
+         <children>
+            <GridPane layoutX="229.0" layoutY="213.0" prefHeight="122.0" prefWidth="328.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="159.20001220703125" minWidth="10.0" prefWidth="96.79998779296875" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="244.0" minWidth="10.0" prefWidth="231.20001220703125" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Server IP:" GridPane.halignment="RIGHT">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Label text="Port:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <TextField fx:id="txtServer" promptText="127.0.0.1" GridPane.columnIndex="1" />
+                  <TextField fx:id="txtPort" promptText="10000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Button fx:id="btnConnect" mnemonicParsing="false" onAction="#connectToServer" text="Connect to Server" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+            <Label layoutX="279.0" layoutY="106.0" text="Messenger App">
+               <font>
+                  <Font size="36.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+      <Label fx:id="labelConnectStatus" text="Not Connected" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+         <GridPane.margin>
+            <Insets right="20.0" />
+         </GridPane.margin>
+      </Label>
+      <Pane fx:id="paneLogin" disable="true" prefHeight="200.0" prefWidth="200.0" visible="false">
+         <children>
+            <Label layoutX="279.0" layoutY="106.0" text="Messenger App">
+               <font>
+                  <Font size="36.0" />
+               </font>
+            </Label>
+            <GridPane layoutX="229.0" layoutY="212.0" prefHeight="122.0" prefWidth="328.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="147.199951171875" minWidth="10.0" prefWidth="97.3999755859375" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="239.20001220703125" minWidth="10.0" prefWidth="230.4000244140625" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Username:" GridPane.halignment="RIGHT">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Label text="Password:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <TextField fx:id="txtLoginUser" GridPane.columnIndex="1" />
+                  <PasswordField fx:id="pTxtPassword" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#loginToApp" prefHeight="26.0" prefWidth="111.0" text="Login" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+            <Button fx:id="btnNewUser" layoutX="339.0" layoutY="402.0" mnemonicParsing="false" onAction="#getToNewUserPane" text="New User? Click Here" />
+         </children>
+      </Pane>
+       <Pane fx:id="paneRegister" disable="true" prefHeight="200.0" prefWidth="200.0" visible="false">
+           <children>
+               <Label layoutX="279.0" layoutY="106.0" text="Messenger App">
+                   <font>
+                       <Font size="36.0" />
+                   </font>
+               </Label>
+               <GridPane layoutX="229.0" layoutY="212.0" prefHeight="160.0" prefWidth="328.0">
+                   <columnConstraints>
+                       <ColumnConstraints hgrow="SOMETIMES" maxWidth="147.199951171875" minWidth="10.0" prefWidth="97.3999755859375" />
+                       <ColumnConstraints hgrow="SOMETIMES" maxWidth="239.20001220703125" minWidth="10.0" prefWidth="230.4000244140625" />
+                   </columnConstraints>
+                   <rowConstraints>
+                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                   </rowConstraints>
+                   <children>
+                       <Label text="Username:" GridPane.halignment="RIGHT">
+                           <GridPane.margin>
+                               <Insets right="10.0" />
+                           </GridPane.margin>
+                       </Label>
+                       <Label text="Password:" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                               <Insets right="10.0" />
+                           </GridPane.margin>
+                       </Label>
+                       <TextField fx:id="txtNewUsername" GridPane.columnIndex="1" />
+                       <PasswordField fx:id="pTxtNewPassword" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                       <Button fx:id="btnSignUp" mnemonicParsing="false" onAction="#signUpAndLogIn" prefHeight="26.0" prefWidth="111.0" text="Register" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                  <Label text="Display Name:" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets right="10.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <TextField fx:id="txtDisplayName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                   </children>
+               </GridPane>
+           </children>
+       </Pane>
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab text="Home">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="275.0" layoutY="91.0" text="Messenger App">
+                           <font>
+                              <Font size="36.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="labelWelcomeMsg" alignment="CENTER" layoutX="272.0" layoutY="145.0" prefHeight="18.0" prefWidth="249.0" text="Welcome User!" textAlignment="CENTER">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="btnDisconnect" layoutX="330.0" layoutY="279.0" mnemonicParsing="false" onAction="#disconnectFromServer" text="Logout and Disconnect" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Compose Message">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <GridPane layoutX="127.0" layoutY="65.0" prefHeight="419.0" prefWidth="525.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="245.20001220703125" minWidth="10.0" prefWidth="80.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="444.79999999999995" minWidth="10.0" prefWidth="444.79999999999995" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="125.60001220703126" minHeight="0.0" prefHeight="0.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="330.40003662109376" minHeight="10.0" prefHeight="330.40003662109376" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="74.79996337890628" minHeight="10.0" prefHeight="10.799963378906284" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Send To:" GridPane.halignment="RIGHT">
+                                 <GridPane.margin>
+                                    <Insets right="10.0" />
+                                 </GridPane.margin>
+                              </Label>
+                              <TextField fx:id="txtSendTo" promptText="Username" GridPane.columnIndex="1" />
+                              <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="314.20001831054685" minHeight="10.0" prefHeight="306.20001831054685" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="155.00000610351563" minHeight="10.0" prefHeight="24.59998168945316" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <TextArea fx:id="txtMsgContent" prefHeight="200.0" prefWidth="200.0" promptText="Type Message Here..." wrapText="true" />
+                                    <GridPane GridPane.rowIndex="1">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="374.3999877929688" minWidth="10.0" prefWidth="329.6" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="399.1999877929687" minWidth="10.0" prefWidth="115.19999999999999" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Label prefHeight="18.0" prefWidth="130.0" text="/ 500 char max" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                             <GridPane.margin>
+                                                <Insets left="2.0" />
+                                             </GridPane.margin>
+                                          </Label>
+                                          <Label fx:id="labelCharLength" text="0" GridPane.halignment="RIGHT" />
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                              </GridPane>
+                              <Button fx:id="btnSendMsg" mnemonicParsing="false" onAction="#sendMessage" text="Send Message" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                           </children>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+            <Tab fx:id="tabviewMsg" onSelectionChanged="#viewMessagesUpdate" text="View Messages">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ListView fx:id="listIncomingMsg" layoutX="23.0" layoutY="30.0" prefHeight="482.0" prefWidth="758.0" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</GridPane>

@@ -55,8 +55,8 @@ class ClientMessage:
         elif option == 2:
             if self.__is_connected:
                 self.__menu_login()
-            if self.__is_logged_in:
-                self.__create_incoming_channel()
+                if self.__is_logged_in:
+                    self.__create_incoming_channel()
             else:
                 print("Connect to server before attempting to login")
         elif option == 3:
