@@ -1,3 +1,4 @@
 [
 [{"_User__username": "raven", "_User__password": "pw1", "_User__display_name": "Raven"}, {"_User__username": "lora", "_User__password": "pw2", "_User__display_name": "Lora"}],
-[{"_Message__msg": "hey", "_Message__sender": "lora", "_Message__recipient": "raven", "_Message__msg_id": 0}, {"_Message__msg": "hi", "_Message__sender": "lora", "_Message__recipient": "raven", "_Message__msg_id": 1}]]
+[{"_Message__msg": "hey", "_Message__sender": "raven", "_Message__recipient": "lora", "_Message__msg_id": 0}, {"_Message__msg": "hi", "_Message__sender": "lora", "_Message__recipient": "raven", "_Message__msg_id": 1}]
+]

@@ -35,9 +35,12 @@ class MessengerSystem:
                 self.__load_from_file()
                 pass
             elif option == 2:
-                self.__start_service()
-                # sleeping to prevent print statements from server mixing with menu print statements.
-                time.sleep(0.5)
+                if self.__server is None:  # only start server once
+                    self.__start_service()
+                    # sleeping to prevent print statements from server mixing with menu print statements.
+                    time.sleep(0.5)
+                else:
+                    print('Service already started.')
             elif option == 3:
                 self.__stop_service()
                 time.sleep(0.5)
@@ -105,6 +108,7 @@ class MessengerSystem:
             outfile.write(',\n')
             json.dump([x.__dict__ for x in self.__server.queued_messages], outfile)
             outfile.write('\n]')
+        print('Users and Messages saved to file successfully.')
 
     '''Stop running server and shut down main thread.'''
     def __end_program(self):

@@ -56,12 +56,15 @@ class ClientMessage:
             else:
                 self.__menu_connect()
         elif option == 2:
-            if self.__is_connected:
-                self.__menu_login()
-                if self.__is_logged_in:
-                    self.__create_incoming_channel()
+            if not self.__is_logged_in:  # prevent attempting to login if already logged in
+                if self.__is_connected:
+                    self.__menu_login()
+                    if self.__is_logged_in:
+                        self.__create_incoming_channel()
+                else:
+                    print("Connect to server before attempting to login")
             else:
-                print("Connect to server before attempting to login")
+                print(f'Already logged in as {self.__username}')
         elif option == 3:
             if self.__is_logged_in:
                 self.__menu_send_message()
