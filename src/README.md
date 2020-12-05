@@ -29,7 +29,7 @@
     	- [X] Client Class
     	- [ ] IncomingMsg class
     	- [X] GUI functionality
-- [ ] Add method descriptions
+- [X] Add method descriptions
 - [ ] Remove all todo
 - [ ] README
 - [ ] Project Structure (separate files for each class?)
